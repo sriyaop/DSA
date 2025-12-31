@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Raga Identifier</title>
+</head>
+<body>
+  <h1>Upload a Song to Identify Raga</h1>
+
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="audioFile" name="audioFile" accept="audio/*" required />
+    <button type="submit">Upload and Identify</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const fileInput = document.getElementById('audioFile');
+      const resultDiv = document.getElementById('result');
+
+      if (fileInput.files.length === 0) {
+        alert('Please select an audio file.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('audioFile', fileInput.files[0]);
+
+      resultDiv.textContent = 'Processing the uploaded song...';
+
+      try {
+        const response = await fetch('/identify-raga', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Server returned an error');
+        }
+
+        const data = await response.json(); // Expected response: { raga: "Kalyani" }
+        resultDiv.innerHTML = `<strong>Identified Raga:</strong> ${data.raga}`;
+      } catch (error) {
+        console.error('Error:', error);
+        resultDiv.textContent = 'An error occurred while identifying the raga.';
+      }
+    });
+  </script>
+</body>
+</html>
